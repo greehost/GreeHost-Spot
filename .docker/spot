@@ -1,0 +1,15 @@
+FROM greehost/catalyst:latest
+
+COPY --chown=catalyst:catalyst  Database/GreeHost-Spot-DB-0.001.tar.gz /tmp/GreeHost-Spot-DB.tar.gz
+
+USER catalyst
+
+ENV PERL_MB_OPT="--install_base /opt/catalyst/perl5"
+ENV PERL_MM_OPT="INSTALL_BASE=/opt/catalyst/perl5"
+ENV PERL5LIB="/opt/catalyst/perl5/lib/perl5"
+
+RUN cpanm /tmp/GreeHost-Spot-DB.tar.gz; rm -f /tmp/GreeHost-Spot-DB.tar.gz; \
+    cpanm Object::Tap Test::Postgresql58 Catalyst::View::JSON Catalyst::Model::DBIC::Schema Import::Into \
+          Catalyst::Plugin::Session::Store::Cookie  Catalyst::Plugin::Session::State::Cookie Catalyst::Plugin::Session;
+
+CMD /bin/bash

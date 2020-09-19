@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:11
+    container_name: spot-database
+    environment:
+      - POSTGRES_PASSWORD=spot
+      - POSTGRES_USER=spot
+      - POSTGRES_DB=spot
+    volumes:
+      - ./Database/etc/schema.sql:/docker-entrypoint-initdb.d/000_schema.sql:ro
+      - database:/var/lib/postgresql/data
+
+  backend:
+    image: greehost/spot:latest
+    container_name: spot-backend
+    environment:
+      - SPOT_USE_ENV_DB=1
+      - DB_DSN=dbi:Pg:host=database;dbname=tcl_db
+      - DB_USER=tcl_user
+      - DB_PASS=tcl_password
+      - PERL_MB_OPT="--install_base /opt/catalyst/perl5"
+      - PERL_MM_OPT="INSTALL_BASE=/opt/catalyst/perl5"
+      - PERL5LIB="/opt/catalyst/perl5/lib/perl5"
+    volumes:
+      - ./Backend:/opt/catalyst/app:rw
+    command: /opt/catalyst/app/script/docker-devel-entry
+
+volumes:
+  database:
+
+

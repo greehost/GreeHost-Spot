@@ -1,0 +1,11 @@
+version: 3
+
+services:
+  backend:
+    image: greehost/spot:latest
+    environment:
+      - USER=catalyst
+    volumes:
+      - ./Backend:/opt/catalyst/app:rw
+    working_dir: /opt/catalyst/app
+    command: prove -lrv -j4

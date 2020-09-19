@@ -1,0 +1,54 @@
+---
+- name: build
+  desc: "Container Building"
+  children:
+    - name: catalyst
+      desc: "Build the greehost/catalyst image."
+      shell:
+        - docker build -f .docker/catalyst --tag greehost/catalyst:latest .docker
+    - name: web
+      desc: "Enter the Web Package"
+      shell:
+        - docker build -f .docker/spot --tag greehost/spot:latest .
+
+- name: devel
+  desc: "Control a docker development environment."
+  children:
+    - name: start
+      desc: "Start a local development server on docker."
+      shell:
+        - docker-compose --project-directory ./ -f .docker/spot-devel.yml up
+    - name: stop
+      desc: "Stop a local development server on docker."
+      shell:
+        - docker-compose --project-directory ./ -f .docker/spot-devel.yml down
+    - name: status
+      desc: "Show the status of the local development cluster."
+      shell:
+        - docker-compose --project-directory ./ -f .docker/spot-devel.yml ps
+    - name: reset
+      desc: "Delete the database volume."
+      shell: 
+        - docker-compose --project-directory ./ -f .docker/spot-devel.yml down -v
+
+- name: shell
+  desc: "Get a shell into the devel cluster."
+  children:
+    - name: backend
+      desc: "Access the backend node"
+      shell:
+        - docker exec --workdir /opt/catalyst/app --user catalyst -ti spot-backend /bin/bash 
+    - name: database
+      desc: "Access the PSQL prompt"
+      shell:
+        - docker exec -ti spot-database psql -U spot spot
+
+
+- name: run
+  desc: "Run Development Environments"
+  children:
+    - name: web
+      desc: "Enter the Web Package"
+      shell:
+        - docker run --rm -ti --user catalyst -v $PWD:/opt/catalyst/app:rw -v $PWD/Database/etc/schema.sql:/opt/catalyst/schema.sql:ro greehost/spot /opt/catalyst/app/Backend/script/docker-web-entry
+        # - docker run --rm -ti --user catalyst --workdir /opt/catalyst/app -v $PWD:/opt/catalyst/app:rw greehost/spot /bin/bash

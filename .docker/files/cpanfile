@@ -1,0 +1,7 @@
+requires 'Moose';
+requires 'DBIx::Class::Schema::Config';
+requires 'Minion';
+requires 'Mojo::Pg';
+requires 'Catalyst::Devel';
+requires 'Catalyst';
+requires 'Dist::Zilla';

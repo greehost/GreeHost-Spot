@@ -1,0 +1,48 @@
+FROM centos:7
+
+COPY files/vimrc /root/.vimrc
+
+RUN yum -y install gcc make autoconf vim perl perl-core perl-App-cpanminus perl-local-lib perl-LWP-Protocol-https \
+        postgresql-devel postgresql-server postgresql-contrib expat-devel libxml2-devel; \
+    yum -y groupinstall "Development Tools" ; \
+    yum -y remove vim-enhanced vim-common vim-filesystem python2-pip ; \
+    yum -y install ncurses ncurses-devel ctags git tcl-devel ruby ruby-devel lua lua-devel luajit \
+        luajit-devel python python-devel python-setuptools perl perl-devel perl-ExtUtils-ParseXS \
+        perl-ExtUtils-XSpp perl-ExtUtils-CBuilder perl-ExtUtils-Embed; \
+    git clone https://github.com/vim/vim.git; \
+    cd vim; \
+    ./configure --with-features=huge --enable-multibyte --enable-rubyinterp --enable-pythoninterp --enable-perlinterp -enable-luainterp; \
+    make; \
+    make install; \
+    git clone https://github.com/hut/ranger.git; \
+    cd ranger; \
+    python setup.py install --optimize=1 --record=install_log.txt; \
+    curl -fLo /root/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; \
+    vim -c ':PlugInstall' -c ':q' -c ':q'; \
+    useradd --create-home --home-dir /opt/catalyst --shell /bin/bash catalyst;
+
+COPY --chown=catalyst:catalyst  files/bashrc                /opt/catalyst/.bashrc
+COPY --chown=catalyst:catalyst  files/vimrc                 /opt/catalyst/.vimrc
+COPY --chown=catalyst:catalyst  files/cpanfile              /opt/catalyst/cpanfile
+COPY --chown=root:root          files/install-from-perl-dir /usr/bin/install-from-perl-dir
+RUN  chmod 0755 /usr/bin/install-from-perl-dir
+
+USER catalyst
+    
+RUN curl -fLo /opt/catalyst/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; \
+    vim -c ':PlugInstall' -c ':q' -c ':q';
+
+ENV PERL_MB_OPT="--install_base /opt/catalyst/perl5"
+ENV PERL_MM_OPT="INSTALL_BASE=/opt/catalyst/perl5"
+ENV PERL5LIB="/opt/catalyst/perl5/lib/perl5"
+
+# It's easier to debug build issues when we keep the created image
+RUN cd                    ; \
+    cpanm --installdeps . ; \
+    cpanm --installdeps . ; \
+    cpanm --installdeps . ; \
+    exit 0;
+
+USER root
+
+CMD /bin/bash

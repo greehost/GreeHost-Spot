@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+INSTALL_ROOT=$1
+
+if [ -z $INSTALL_ROOT ];
+then
+    echo "Must supply install root!";
+    exit 1;
+fi
+
+if [ ! -d $INSTALL_ROOT ];
+then
+    echo "Install Root must be a directory!";
+    exit 1;
+fi;
+
+cd $INSTALL_ROOT
+
+if [ -f modules ];
+then
+    for dir in `cat modules`; do
+        if [ ! -d $dir ];
+        then
+            continue;
+        fi;
+
+        if [ ! -f "$dir/Makefile.PL" ];
+        then
+            continue;
+        fi;
+
+        cd $dir;
+        perl Makefile.PL ; make manifest ; make dist ; cpanm *.tar.gz ; cpanm *.tar.gz ; cpanm *.tar.gz;
+        cd ../;
+    done;
+else
+    for dir in `ls -1`; do
+        if [ ! -d $dir ];
+        then
+            continue;
+        fi;
+
+        if [ ! -f "$dir/Makefile.PL" ];
+        then
+            continue;
+        fi;
+
+        cd $dir;
+        perl Makefile.PL ; make manifest ; make dist ; cpanm *.tar.gz ; cpanm *.tar.gz ; cpanm *.tar.gz;
+        cd ../
+    done;
+fi;

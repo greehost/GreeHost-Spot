@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export PERL_MB_OPT="--install_base /opt/catalyst/perl5"
+export PERL_MM_OPT="INSTALL_BASE=/opt/catalyst/perl5"
+export PERL5LIB="/opt/catalyst/perl5/lib/perl5"
+
+cd /opt/catalyst/app/Database
+dzil build
+cpanm GreeHost-Spot-DB-*.tar.gz
+
+cd /opt/catalyst/app/Backend
+cpanm --installdeps .
+
+exec bash -l
