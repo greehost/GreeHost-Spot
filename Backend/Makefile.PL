@@ -31,6 +31,7 @@ requires 'Object::Tap';
 requires 'Catalyst::Plugin::Session';
 requires 'Catalyst::Plugin::Session::Store::Cookie';
 requires 'Catalyst::Plugin::Session::State::Cookie';
+requires 'DateTime::TimeZone';
 
 # Default test requires
 test_requires 'Test::More' => '0.88';
